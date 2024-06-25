@@ -3,19 +3,22 @@
 from kivy import platform
 from kivy.lang import Builder
 from kivy.storage import jsonstore
+from kivy.storage.jsonstore import JsonStore
 from kivymd.app import MDApp
+from kivy.metrics import dp
 from kivymd.uix.pickers import MDModalDatePicker
 from kivymd.uix.screen import MDScreen
+from kivymd.uix.snackbar import MDSnackbar, MDSnackbarText
 from kivymd.uix.screenmanager import MDScreenManager
 
-from .events import load_phases
+from events import load_phases
 
 if platform == "android":
     from android.permissions import Permission, request_permissions
     request_permissions([Permission.CAMERA, Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
 
 
-store = jsonstore.JsonStore('./test.json')
+store = jsonstore.JsonStore('test.json')
 
 
 Builder.load_string('''
@@ -25,10 +28,11 @@ Builder.load_string('''
         cols: 1
         MDLabel:
             text: "TEst"
-        Button:
+        MDButton:
             style: "tonal"
-            text: 'I see blood!'
             on_press: root.manager.current = 'create_quarter'
+            MDButtonText:
+                text: 'I see blood!'
         Button:
             text: 'Show phase'
             # on_press: root.manager.current = 'show_active_state'
@@ -36,8 +40,6 @@ Builder.load_string('''
             text: 'Salary report'
 
 <CreateQuarter>:
-    # name: str(createQuarter_startDate)
-    # job: job_input
     MDGridLayout:
         cols: 2
         MDButton:
@@ -48,22 +50,23 @@ Builder.load_string('''
 
             MDButtonText:
                 text: "Open modal date picker dialog"
-        Label:
+        MDLabel:
             text: 'Job'
-        TextInput:
-            id: job_input
-        Label:
-            text: 'Salary'
-        TextInput:
-        Label:
-            text: 'Date of Joining'
-        TextInput:
+        MDTextField:
+            id: 'test'
+            mode: "filled"
+            max_height: "200dp"
+            multiline: True
+    
+            MDTextFieldHelperText:
+                text: "multiline=True"
+                mode: "persistent"
         Button:
             text: 'Back to menu'
             on_press: root.manager.current = 'menu'
         Button:
             text: 'Save'
-            on_press: app.save(createQuarter_startDate.text, job_input.text)
+            on_press: app.save()
 ''')
 
 
@@ -88,6 +91,9 @@ class TestApp(MDApp):
         date_dialog.bind(on_cancel=self.createQuarter_closePicker)
         date_dialog.open()
 
+    def createQuarter_startDate(self):
+        pass
+
     def createQuarter_closePicker(self, instance_date_picker):
         instance_date_picker.is_open=False
         instance_date_picker.dismiss()
@@ -95,6 +101,15 @@ class TestApp(MDApp):
     def save(self, name, job):
         # fob = open('./test.txt','w')
         store.put(name, job=job)
+        print(name, job)
+        MDSnackbar(
+            MDSnackbarText(
+                text=f"saved {name}, {job}",
+            ),
+            y=dp(24),
+            pos_hint={"center_x": 0.5},
+            size_hint_x=0.5,
+        ).open()
 
     def on_start(self):
         def callback_load_phase(instance, value):
@@ -103,3 +118,12 @@ class TestApp(MDApp):
 
         ins = load_phases.PhaseEventManager()
         ins.bind(phase=callback_load_phase)
+
+        MDSnackbar(
+            MDSnackbarText(
+                text="Text",
+            ),
+            y=dp(24),
+            pos_hint={"center_x": 0.5},
+            size_hint_x=0.5,
+        ).open()

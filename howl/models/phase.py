@@ -1,4 +1,4 @@
-from .model import Model
+from howl.models.model import Model
 
 
 class BoundaryDate:

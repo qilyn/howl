@@ -1,5 +1,5 @@
-from .model import Model
-from .phase import BoundaryDate
+from howl.models.model import Model
+from howl.models.phase import BoundaryDate
 
 
 class Quarter(Model):
